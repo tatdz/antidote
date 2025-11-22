@@ -4,12 +4,6 @@
 
 Antidote is the first fully permissioned margin call protection protocol built directly into Uniswap v4 hooks, providing institutional-grade risk management with regulatory compliance.
 
-# Antidote Protocol
-
-**Institutional-Grade Margin Protection for DeFi**
-
----
-
 ## 🚀 Key Features
 
 ### 🔄 Atomic Protection
