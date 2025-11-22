@@ -130,11 +130,11 @@ contract MarginCallInsuranceHook is BaseHook, ReentrancyGuard {
         
         _updatePricesWithData(priceUpdateData);
         
-        // FIXED: Get prices that are already properly converted
+        // Get prices that are already properly converted
         (uint256 collateralPrice, uint256 debtPrice) = _getCachedPrices(collateralFeedId, debtFeedId);
         require(collateralPrice > 0 && debtPrice > 0, "Invalid prices");
         
-        // FIXED: Prices from _getCachedPrices are already in proper format (scaled by 10^8)
+        // Prices from _getCachedPrices are already in proper format (scaled by 10^8)
         // So we multiply amounts (in wei/smallest unit) by price, then divide by 1e18 to get USD value
         // Example: 0.001 ETH (1e15 wei) * 3419e8 (price) / 1e18 = 3.419 USD
         uint256 collateralValue = (collateralAmount * collateralPrice) / 1e18;
@@ -206,7 +206,7 @@ contract MarginCallInsuranceHook is BaseHook, ReentrancyGuard {
         (uint256 collateralPrice, uint256 debtPrice) = _getCachedPrices(ETH_USD_FEED_ID, USDC_USD_FEED_ID);
         require(collateralPrice > 0 && debtPrice > 0, "Invalid prices");
         
-        // FIXED: Same calculation fix as above
+        // Same calculation fix as above
         uint256 collateralValue = (collateralAmount * collateralPrice) / 1e18;
         uint256 debtValue = (debtAmount * debtPrice) / 1e18;
         
@@ -267,6 +267,70 @@ contract MarginCallInsuranceHook is BaseHook, ReentrancyGuard {
         } catch {}
     }
 
+    // FIXED: Enable fresh price updates during margin call checks (same approach as insurance purchase)
+    function _checkMarginCallWithFreshPrices(address user, bytes[] calldata priceUpdateData) internal returns (string memory reason) {
+        InsurancePolicy storage policy = policies[user];
+        if (!policy.active) return "No active policy";
+
+        // Update prices with fresh data before checking margin call
+        if (priceUpdateData.length > 0) {
+            uint256 fee = pyth.getUpdateFee(priceUpdateData);
+            if (address(this).balance >= fee) {
+                pyth.updatePriceFeeds{value: fee}(priceUpdateData);
+                _cachePrices();
+            }
+        }
+
+        (uint256 collateralPrice, uint256 debtPrice) = _getCachedPrices(policy.collateralFeedId, policy.debtFeedId);
+        
+        if (collateralPrice == 0 || debtPrice == 0) return "Price data unavailable";
+        
+        // Same calculation fix
+        uint256 collateralValue = (policy.collateralAmount * collateralPrice) / 1e18;
+        uint256 debtValue = (policy.debtAmount * debtPrice) / 1e18;
+        
+        if (debtValue == 0) return "No debt position";
+        
+        uint256 collateralizationRatio = (collateralValue * PREMIUM_BASE) / debtValue;
+        
+        if (collateralizationRatio < policy.marginThreshold) {
+            // Get cached prices for comparison
+            PriceData memory collateralData = priceCache[policy.collateralFeedId];
+            PriceData memory debtData = priceCache[policy.debtFeedId];
+            
+            uint256 cachedCollateralPrice = _convertPythPrice(collateralData);
+            uint256 cachedDebtPrice = _convertPythPrice(debtData);
+            
+            if (collateralPrice < (cachedCollateralPrice * 90) / 100) {
+                reason = "Collateral price dropped significantly";
+            } else if (debtPrice > (cachedDebtPrice * 110) / 100) {
+                reason = "Debt value increased significantly";
+            } else {
+                reason = "Position undercollateralized";
+            }
+            
+            uint256 payout = policy.coverageAmount;
+            if (address(this).balance >= payout) {
+                payable(user).transfer(payout);
+                policy.active = false;
+                totalPayouts += payout;
+                
+                // Remove from active policies
+                _removeFromActivePolicies(user);
+                
+                emit MarginCallTriggered(user, collateralValue, debtValue, payout, reason);
+            }
+        } else if (collateralizationRatio < policy.marginThreshold + 1000) {
+            reason = "Approaching margin call threshold";
+        } else {
+            reason = "Position safe";
+        }
+        
+        policy.lastCheck = block.timestamp;
+        return reason;
+    }
+
+    // Original _checkMarginCall for backward compatibility (uses cached prices)
     function _checkMarginCall(address user) internal returns (string memory reason) {
         InsurancePolicy storage policy = policies[user];
         if (!policy.active) return "No active policy";
@@ -275,7 +339,7 @@ contract MarginCallInsuranceHook is BaseHook, ReentrancyGuard {
         
         if (collateralPrice == 0 || debtPrice == 0) return "Price data unavailable";
         
-        // FIXED: Same calculation fix
+        // Same calculation fix
         uint256 collateralValue = (policy.collateralAmount * collateralPrice) / 1e18;
         uint256 debtValue = (policy.debtAmount * debtPrice) / 1e18;
         
@@ -339,7 +403,7 @@ contract MarginCallInsuranceHook is BaseHook, ReentrancyGuard {
         debtPrice = _convertPythPrice(debtData);
     }
 
-    // FIXED: This function now returns the raw Pyth price (already scaled by 10^expo)
+    // This function returns the raw Pyth price (already scaled by 10^expo)
     // For ETH with expo=-8: returns 341909000000 (which represents $3419.09)
     // For USDC with expo=-8: returns 99982663 (which represents $0.999827)
     function _convertPythPrice(PriceData memory priceData) internal pure returns (uint256) {
@@ -427,6 +491,18 @@ contract MarginCallInsuranceHook is BaseHook, ReentrancyGuard {
         return (BaseHook.afterRemoveLiquidity.selector, delta);
     }
 
+    // NEW: Check margin call status with fresh prices
+    function checkMarginCallStatusWithFreshPrices(address user, bytes[] calldata priceUpdateData) 
+        external 
+        payable 
+        returns (string memory reason, bool isDangerous) 
+    {
+        reason = _checkMarginCallWithFreshPrices(user, priceUpdateData);
+        isDangerous = _isDangerousReason(reason);
+        return (reason, isDangerous);
+    }
+
+    // Original checkMarginCallStatus for backward compatibility
     function checkMarginCallStatus(address user) external returns (string memory reason, bool isDangerous) {
         reason = _checkMarginCall(user);
         isDangerous = _isDangerousReason(reason);
@@ -485,7 +561,7 @@ contract MarginCallInsuranceHook is BaseHook, ReentrancyGuard {
             return (true, type(uint256).max, policy.premiumPaid, policy.coverageAmount, policy.lastCheck, policy.paymentToken);
         }
         
-        // FIXED: Same calculation fix
+        // Same calculation fix
         uint256 collateralValue = (policy.collateralAmount * collateralPrice) / 1e18;
         uint256 debtValue = (policy.debtAmount * debtPrice) / 1e18;
         
@@ -532,6 +608,7 @@ contract MarginCallInsuranceHook is BaseHook, ReentrancyGuard {
         return activePolicyCount;
     }
 
+    // checkAllActivePolicies uses fresh prices for margin call checks
     function checkAllActivePolicies(bytes[] calldata priceUpdateData) external payable {
         uint256 fee = pyth.getUpdateFee(priceUpdateData);
         require(msg.value >= fee, "Insufficient fee");
@@ -539,12 +616,12 @@ contract MarginCallInsuranceHook is BaseHook, ReentrancyGuard {
         pyth.updatePriceFeeds{value: fee}(priceUpdateData);
         _cachePrices();
         
-        // Check all active policies (limit to prevent gas issues)
+        // Check all active policies with fresh prices (limit to prevent gas issues)
         uint256 maxChecks = activePolicies.length > 10 ? 10 : activePolicies.length;
         for (uint256 i = 0; i < maxChecks; i++) {
             address user = activePolicies[i];
             if (policies[user].active) {
-                _checkMarginCall(user);
+                _checkMarginCall(user); // Uses the freshly updated prices
             }
         }
         
