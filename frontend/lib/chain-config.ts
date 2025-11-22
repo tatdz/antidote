@@ -29,14 +29,14 @@ export interface ChainConfig {
 export const CHAIN_CONFIGS: Record<number, ChainConfig> = {
   [sepolia.id]: {
     chain: sepolia,
-    hookAddress: '0x1C9f149Ab2eb65d1928f5373b91bD5e8E48BCfC0' as `0x${string}`,
+    hookAddress: '0xCca4f3F7dB08C48cB6f315D4c9A54CB9c31C8FC0' as `0x${string}`,
     pythAddress: '0xDd24F84d36BF92C65F92307595335bdFab5Bbd21' as `0x${string}`,
     poolManagerAddress: '0xE03A1074c86CFeDd5C142C4F04F1a1536e203543' as `0x${string}`,
     universalRouterAddress: '0x3A9D48AB9751398BbFa63ad67599Bb04e4BdF98b' as `0x${string}`,
     stateViewAddress: '0xe1dd9c3fa50edb962e442f60dfbc432e24537e4c' as `0x${string}`,
-    riskTokenAddress: '0xEba681bc4C4e5EdA7Dabace33890947Aa99B98F3' as `0x${string}`,
+    riskTokenAddress: '0xA57bc9919F90dc0442b38F9C7237F1D245d09397' as `0x${string}`,
     claimVerifierAddress: '0x1dDef033109bf61946915A0e32fbDef770beF9D0' as `0x${string}`,
-    secondaryMarketAddress: '0xf50323584E39aB218bD369C2Ab73FB95e8907F00' as `0x${string}`,
+    secondaryMarketAddress: '0x0c6a3C6cE6f0cf7F7F7b721ABE27bFb4e76cfD22' as `0x${string}`,
     name: 'Ethereum Sepolia',
     rpcUrl: process.env.NEXT_PUBLIC_ALCHEMY_ETHEREUM_SEPOLIA_URL || 'https://eth-sepolia.g.alchemy.com/v2/demo',
     testTokens: {
@@ -49,19 +49,19 @@ export const CHAIN_CONFIGS: Record<number, ChainConfig> = {
       tickSpacing: 60,
       currency0: '0x0000000000000000000000000000000000000000' as `0x${string}`,
       currency1: '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238' as `0x${string}`,
-      hookAddress: '0x1C9f149Ab2eb65d1928f5373b91bD5e8E48BCfC0' as `0x${string}`
+      hookAddress: '0xCca4f3F7dB08C48cB6f315D4c9A54CB9c31C8FC0' as `0x${string}`
     }
   },
   [baseSepolia.id]: {
     chain: baseSepolia,
-    hookAddress: '0x1C9f149Ab2eb65d1928f5373b91bD5e8E48BCfC0' as `0x${string}`,
+    hookAddress: '0xCca4f3F7dB08C48cB6f315D4c9A54CB9c31C8FC0' as `0x${string}`,
     pythAddress: '0xA2aa501b19aff244D90cc15a4Cf739D2725B5729' as `0x${string}`,
     poolManagerAddress: '0x05E73354cFDd6745C338b50BcFDfA3Aa6fA03408' as `0x${string}`,
     universalRouterAddress: '0x492E6456D9528771018DeB9E87ef7750EF184104' as `0x${string}`,
     stateViewAddress: '0x571291b572ed32ce6751a2cb2486ebee8defb9b4' as `0x${string}`,
-    riskTokenAddress: '0xAcd7FFd3Bbb6A57E6856655Cb34b17169584486A' as `0x${string}`,
+    riskTokenAddress: '0x3811ee90A5dEf4FDFBd18aC3cf77Cf3de07da216' as `0x${string}`,
     claimVerifierAddress: '0xca549C806197D7E4C281E490Ce5de54109163467' as `0x${string}`,
-    secondaryMarketAddress: '0xb9c5e84B986e6574D34189F6591245c2fe82Ac44' as `0x${string}`,
+    secondaryMarketAddress: '0xF492fD2eFDE1B091B7ea0ae69199Eb38eE883Ac6' as `0x${string}`,
     name: 'Base Sepolia',
     rpcUrl: process.env.NEXT_PUBLIC_ALCHEMY_BASE_SEPOLIA_URL || 'https://base-sepolia.g.alchemy.com/v2/demo',
     testTokens: {
@@ -74,7 +74,7 @@ export const CHAIN_CONFIGS: Record<number, ChainConfig> = {
       tickSpacing: 60,
       currency0: '0x0000000000000000000000000000000000000000' as `0x${string}`,
       currency1: '0x036CbD53842c5426634e7929541eC2318f3dCF7e' as `0x${string}`,
-      hookAddress: '0x1C9f149Ab2eb65d1928f5373b91bD5e8E48BCfC0' as `0x${string}`
+      hookAddress: '0xCca4f3F7dB08C48cB6f315D4c9A54CB9c31C8FC0' as `0x${string}`
     }
   }
 };
