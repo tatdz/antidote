@@ -14,39 +14,79 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     console.log('📦 Starting IPFS upload...');
+    
+    // Use ALL available Pinata credentials
     const pinataJWT = process.env.PINATA_JWT;
+    const pinataApiKey = process.env.PINATA_API_KEY;
+    const pinataSecret = process.env.PINATA_API_SECRET;
 
-    if (!pinataJWT) {
-      throw new Error('PINATA_JWT environment variable is required');
+    console.log('🔐 Available credentials:', {
+      hasJWT: !!pinataJWT,
+      hasApiKey: !!pinataApiKey,
+      hasSecret: !!pinataSecret
+    });
+
+    // Try JWT first, then API key/secret
+    let authHeader = '';
+    if (pinataJWT) {
+      console.log('🔑 Using JWT authentication');
+      authHeader = `Bearer ${pinataJWT}`;
+    } else if (pinataApiKey && pinataSecret) {
+      console.log('🔑 Using API key authentication');
+      // For API key, we use different headers
+    } else {
+      throw new Error('No Pinata credentials found. Please check your environment variables.');
     }
-
-    console.log('🔑 Using JWT authentication');
-    console.log('📊 Data to upload:', typeof data, 'keys:', Object.keys(data).slice(0, 5));
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 30000);
 
     try {
-      // FIX: Send the data directly as pinataContent, don't nest it
-      const response = await fetch('https://api.pinata.cloud/pinning/pinJSONToIPFS', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${pinataJWT}`
-        },
-        body: JSON.stringify({
-          pinataContent: data, // Direct data, no nesting
-          pinataMetadata: {
-            name: `claim-proof-${Date.now()}.json`,
-            keyvalues: {
-              type: 'zk-proof',
-              timestamp: Date.now().toString(),
-              app: 'insurance-protocol'
+      let response;
+      
+      if (pinataJWT) {
+        response = await fetch('https://api.pinata.cloud/pinning/pinJSONToIPFS', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': authHeader
+          },
+          body: JSON.stringify({
+            pinataContent: data,
+            pinataMetadata: {
+              name: `claim-proof-${Date.now()}.json`,
+              keyvalues: {
+                type: 'zk-proof',
+                timestamp: Date.now().toString(),
+                app: 'insurance-protocol'
+              }
             }
-          }
-        }),
-        signal: controller.signal
-      });
+          }),
+          signal: controller.signal
+        });
+      } else {
+        // Use API key/secret method
+        response = await fetch('https://api.pinata.cloud/pinning/pinJSONToIPFS', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'pinata_api_key': pinataApiKey!,
+            'pinata_secret_api_key': pinataSecret!
+          },
+          body: JSON.stringify({
+            pinataContent: data,
+            pinataMetadata: {
+              name: `claim-proof-${Date.now()}.json`,
+              keyvalues: {
+                type: 'zk-proof',
+                timestamp: Date.now().toString(),
+                app: 'insurance-protocol'
+              }
+            }
+          }),
+          signal: controller.signal
+        });
+      }
 
       clearTimeout(timeoutId);
 
@@ -67,15 +107,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           details: errorDetails
         });
 
-        if (response.status === 401) {
-          throw new Error('Invalid Pinata JWT');
-        } else if (response.status === 403) {
-          throw new Error('Pinata API key does not have required permissions');
-        } else if (response.status === 429) {
-          throw new Error('Rate limit exceeded');
-        } else {
-          throw new Error(`Pinata API error: ${response.status} - ${response.statusText}`);
-        }
+        throw new Error(`Pinata API error: ${response.status}`);
       }
 
       const result = await response.json();
