@@ -595,7 +595,7 @@ const clearPersistedData = useCallback(() => {
 
       // Test with simulation first
       try {
-        console.log('Simulating transaction with corrected ETH amount...');
+        console.log('🛡️ Verifying transaction will succeed...');
         const simulation = await publicClient.simulateContract({
           address: secondaryMarketAddress,
           abi: SECONDARY_MARKET_ABI,
@@ -608,7 +608,7 @@ const clearPersistedData = useCallback(() => {
           value: totalPrice,
           account: address,
         });
-        console.log('✅ Simulation successful with corrected ETH amount');
+        console.log('✅ Transaction verification passed - ready to execute');
       } catch (simError: any) {
         console.error('❌ Simulation failed:', simError.message);
         if (simError.details) {
