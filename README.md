@@ -4,24 +4,30 @@
 
 Antidote is the first fully permissioned margin call protection protocol built directly into Uniswap v4 hooks, providing institutional-grade risk management with regulatory compliance.
 
+# Antidote Protocol
+
+**Institutional-Grade Margin Protection for DeFi**
+
+---
+
 ## 🚀 Key Features
 
 ### 🔄 Atomic Protection
 - **Real-time margin call detection** within Uniswap v4 hooks
-- **Fresh price updates** during both insurance purchases AND margin call checks
 - **Automatic payouts** when positions fall below 110% collateralization
+- **Live deployment** on Ethereum Sepolia & Base Sepolia testnets
 
-### 🏛️ Institutional Access  
-- **KYC-gated** via Coinbase x402 & CDP Facilitator
+### 🏛️ Institutional DeFi Focus
+- **KYC-gated access** via Coinbase x402 & CDP Facilitator
 - **Permissioned secondary markets** for risk token trading
-- **Compliant DeFi** for institutional participation
+- **Compliant infrastructure** for institutional participation
+- **ETH/USDC stable pool** foundation for institutional risk markets
 
-### 📊 Pyth Oracle Integration - ✅ FULLY IMPLEMENTED
+### 📊 Pyth Oracle Integration
 - **Hermes pull architecture** with on-chain price updates
 - **Dual update strategy**: Fresh prices during purchases AND margin calls
 - **Real-time price consumption** for premium calculations & risk assessment
 - **Automated price pusher** with 30-second refresh intervals
-- **Robust error handling** with fee management
 
 ### 🔒 Privacy-Preserving Claims
 - **zk-SNARK claims** with Poseidon hashing
@@ -30,13 +36,28 @@ Antidote is the first fully permissioned margin call protection protocol built d
 
 ### 💸 Tokenized Risk Management
 - **Fractional insurance shares** in permissioned secondary markets
-- **Real institutional payout examples** with verified transaction history
+- **Verified transaction history** with real payout examples
 - **Automated coverage scaling** based on position size
 
 ### 🎯 Advanced Monitoring
 - **Live system monitoring** with real-time event feeds
 - **Position status tracking** with color-coded risk levels
 - **Insurance pool management** with automated funding alerts
+
+---
+
+## 🗺️ Technical Roadmap
+
+### ✅ **Phase 1: Foundation** (Complete)
+- Uniswap v4 hook integration with atomic margin protection
+- Pyth oracle integration with real-time price feeds
+- ETH/USDC insurance pool implementation
+- Institutional access controls via Coinbase x402
+
+### 🚧 **Phase 2: Institutional Scaling** (Planned)
+- Dynamic premium optimization based on market volatility
+- Expanded asset coverage for major DeFi collateral types
+- Cross-chain protection layers across multiple L2s
 
 ## 🎯 Use Cases
 - **Institutional lending protocols
