@@ -6,11 +6,37 @@ Antidote is the first fully permissioned margin call protection protocol built d
 
 ## 🚀 Key Features
 
-- **🔄 Atomic Protection**: Real-time margin call detection within Uniswap v4 hooks
-- **🏛️ Institutional Access**: KYC-gated via Coinbase x402 & CDP Facilitator
-- **📊 Live Pricing**: Pyth Oracle integration with Hermes pull architecture  
-- **🔒 Privacy-Preserving**: zk-SNARK claims with Poseidon hashing
-- **💸 Tokenized Risk**: Fractional insurance shares in permissioned secondary markets
+### 🔄 Atomic Protection
+- **Real-time margin call detection** within Uniswap v4 hooks
+- **Fresh price updates** during both insurance purchases AND margin call checks
+- **Automatic payouts** when positions fall below 110% collateralization
+
+### 🏛️ Institutional Access  
+- **KYC-gated** via Coinbase x402 & CDP Facilitator
+- **Permissioned secondary markets** for risk token trading
+- **Compliant DeFi** for institutional participation
+
+### 📊 Pyth Oracle Integration - ✅ FULLY IMPLEMENTED
+- **Hermes pull architecture** with on-chain price updates
+- **Dual update strategy**: Fresh prices during purchases AND margin calls
+- **Real-time price consumption** for premium calculations & risk assessment
+- **Automated price pusher** with 30-second refresh intervals
+- **Robust error handling** with fee management
+
+### 🔒 Privacy-Preserving Claims
+- **zk-SNARK claims** with Poseidon hashing
+- **IPFS proof storage** with decentralized archiving
+- **Local fallback storage** for maximum reliability
+
+### 💸 Tokenized Risk Management
+- **Fractional insurance shares** in permissioned secondary markets
+- **Real institutional payout examples** with verified transaction history
+- **Automated coverage scaling** based on position size
+
+### 🎯 Advanced Monitoring
+- **Live system monitoring** with real-time event feeds
+- **Position status tracking** with color-coded risk levels
+- **Insurance pool management** with automated funding alerts
 
 ## 🎯 Use Cases
 - **Institutional lending protocols
@@ -20,7 +46,7 @@ Antidote is the first fully permissioned margin call protection protocol built d
 
 ## 🏗️ Architecture
 
-![alt text](<Compact Horizontal_antidote.svg>)
+![alt text](<Compact_Horizontal_antidote.svg>)
 
 ## 🛠️ Tech Stack
 
