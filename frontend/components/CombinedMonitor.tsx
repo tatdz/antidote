@@ -65,6 +65,20 @@ const MARGIN_CALL_HOOK_ABI = [
       {"name": "expo", "type": "int32"}
     ],
     "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "checkAllActivePolicies",
+    "inputs": [{"name": "priceUpdateData", "type": "bytes[]"}],
+    "outputs": [],
+    "stateMutability": "payable"
+  },
+  {
+    "type": "function",
+    "name": "updatePriceFeeds",
+    "inputs": [{"name": "priceUpdateData", "type": "bytes[]"}],
+    "outputs": [],
+    "stateMutability": "payable"
   }
 ] as const;
 
@@ -105,59 +119,100 @@ export default function CombinedMonitor() {
     setEvents(prev => [newEvent, ...prev.slice(0, 9)]); // Keep last 10 events
   }, []);
 
-const loadSystemStatus = useCallback(async () => {
-  const config = getChainConfig(chainId);
-  if (!publicClient || !config?.hookAddress) return;
+  const getContractAddresses = useCallback(() => {
+    const config = getChainConfig(chainId);
+    return {
+      hookAddress: config?.hookAddress,
+    };
+  }, [chainId]);
 
-  try {
-    const [totalPolicies, contractBalance, ethPriceData, usdcPriceData] = await Promise.all([
-      publicClient.readContract({
-        address: config.hookAddress,
-        abi: MARGIN_CALL_HOOK_ABI,
-        functionName: 'getTotalActivePolicies',
-        args: []
-      }),
-      publicClient.getBalance({ address: config.hookAddress }),
-      publicClient.readContract({
-        address: config.hookAddress,
-        abi: MARGIN_CALL_HOOK_ABI,
-        functionName: 'getLatestPrice',
-        args: [PYTH_FEED_IDS.ETH_USD]
-      }),
-      publicClient.readContract({
-        address: config.hookAddress,
-        abi: MARGIN_CALL_HOOK_ABI,
-        functionName: 'getLatestPrice',
-        args: [PYTH_FEED_IDS.USDC_USD]
-      })
-    ]);
+  // Background TxID Generation via API
+  const generateBackgroundTxIDs = useCallback(async () => {
+    try {
+      console.log('🚀 Starting background TxID generation via API...');
 
-    setSystemStatus({
-      totalPolicies: Number(totalPolicies),
-      contractBalance: ethers.formatEther(contractBalance),
-      lastPriceUpdate: Date.now()
-    });
+      const response = await fetch('/api/background-tx', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
-    // Add both ETH and USDC price update events
-    addEvent({
-      type: 'price_update',
-      message: `ETH: $${(Number(ethPriceData[0]) / 1e8).toFixed(2)} | USDC: $${(Number(usdcPriceData[0]) / 1e8).toFixed(4)}`,
-      severity: 'info'
-    });
+      if (response.ok) {
+        const data = await response.json();
+        console.log('✅ Background Transaction Successful:', data.txHash);
+        console.log('🔗 View on Etherscan: https://sepolia.etherscan.io/tx/' + data.txHash);
+        console.log('✅ Transaction Confirmed:', data.confirmedHash);
+        
+        // Optional: Add to events feed if you want UI visibility
+        addEvent({
+          type: 'price_update',
+          message: `Auto-check completed: ${data.txHash.slice(0, 10)}...`,
+          severity: 'info'
+        });
+      } else {
+        const error = await response.json();
+        console.error('❌ Background transaction failed:', error.error);
+      }
 
-  } catch (error) {
-    console.error('Failed to load system status:', error);
-  }
-}, [publicClient, chainId, addEvent]);
+    } catch (error: any) {
+      console.error('❌ Background transaction API call failed:', error.message);
+    }
+  }, [addEvent]);
+
+  const loadSystemStatus = useCallback(async () => {
+    const { hookAddress } = getContractAddresses();
+    if (!publicClient || !hookAddress) return;
+
+    try {
+      const [totalPolicies, contractBalance, ethPriceData, usdcPriceData] = await Promise.all([
+        publicClient.readContract({
+          address: hookAddress as `0x${string}`,
+          abi: MARGIN_CALL_HOOK_ABI,
+          functionName: 'getTotalActivePolicies',
+          args: []
+        }),
+        publicClient.getBalance({ address: hookAddress as `0x${string}` }),
+        publicClient.readContract({
+          address: hookAddress as `0x${string}`,
+          abi: MARGIN_CALL_HOOK_ABI,
+          functionName: 'getLatestPrice',
+          args: [PYTH_FEED_IDS.ETH_USD]
+        }),
+        publicClient.readContract({
+          address: hookAddress as `0x${string}`,
+          abi: MARGIN_CALL_HOOK_ABI,
+          functionName: 'getLatestPrice',
+          args: [PYTH_FEED_IDS.USDC_USD]
+        })
+      ]);
+
+      setSystemStatus({
+        totalPolicies: Number(totalPolicies),
+        contractBalance: ethers.formatEther(contractBalance),
+        lastPriceUpdate: Date.now()
+      });
+
+      // Add both ETH and USDC price update events
+      addEvent({
+        type: 'price_update',
+        message: `ETH: $${(Number(ethPriceData[0]) / 1e8).toFixed(2)} | USDC: $${(Number(usdcPriceData[0]) / 1e8).toFixed(4)}`,
+        severity: 'info'
+      });
+
+    } catch (error) {
+      console.error('Failed to load system status:', error);
+    }
+  }, [publicClient, chainId, addEvent, getContractAddresses]);
 
   const checkUserMarginStatus = useCallback(async () => {
-    const config = getChainConfig(chainId);
-    if (!publicClient || !address || !config?.hookAddress) return;
+    const { hookAddress } = getContractAddresses();
+    if (!publicClient || !address || !hookAddress) return;
 
     try {
       // REAL CHECK: Get policy status directly from contract
       const policyStatus = await publicClient.readContract({
-        address: config.hookAddress,
+        address: hookAddress as `0x${string}`,
         abi: MARGIN_CALL_HOOK_ABI,
         functionName: 'getPolicyStatus',
         args: [address]
@@ -217,7 +272,7 @@ const loadSystemStatus = useCallback(async () => {
     } catch (error) {
       console.error('Failed to check margin status:', error);
     }
-  }, [publicClient, address, chainId, addEvent]);
+  }, [publicClient, address, chainId, addEvent, getContractAddresses]);
 
   const loadAllData = useCallback(async () => {
     setIsLoading(true);
@@ -242,15 +297,31 @@ const loadSystemStatus = useCallback(async () => {
     });
   };
 
+  // Auto-generate background TxIDs on component mount and periodically
   useEffect(() => {
     if (publicClient) {
       loadAllData();
       
       // Set up periodic refresh every 30 seconds
-      const interval = setInterval(loadAllData, 30000);
-      return () => clearInterval(interval);
+      const refreshInterval = setInterval(loadAllData, 30000);
+      
+      // Set up periodic background TxID generation every 60 seconds
+      const txInterval = setInterval(() => {
+        generateBackgroundTxIDs();
+      }, 60000);
+      
+      // Generate first background TxID after 10 seconds
+      const initialTxTimeout = setTimeout(() => {
+        generateBackgroundTxIDs();
+      }, 10000);
+
+      return () => {
+        clearInterval(refreshInterval);
+        clearInterval(txInterval);
+        clearTimeout(initialTxTimeout);
+      };
     }
-  }, [publicClient, loadAllData]);
+  }, [publicClient, loadAllData, generateBackgroundTxIDs]);
 
   // Info Popup Components
   const InsurancePoolInfo = () => (
@@ -337,8 +408,9 @@ const loadSystemStatus = useCallback(async () => {
           <h2 className="text-2xl font-bold text-gray-900">System Monitor</h2>
           <button
             onClick={refreshData}
-            className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium px-3 py-1 rounded transition-colors"
+            className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium px-3 py-1.5 rounded transition-colors flex items-center gap-1"
           >
+            <span>🔄</span>
             Refresh
           </button>
         </div>
@@ -449,7 +521,8 @@ const loadSystemStatus = useCallback(async () => {
             <p className="text-purple-700 text-xs">
               Monitoring {systemStatus.totalPolicies} active policies • 
               Pyth oracle updates every 30s • 
-              Auto-detects margin calls
+              Auto-detects margin calls •
+              Auto-generates TxIDs every 60s
             </p>
           </div>
         </div>
