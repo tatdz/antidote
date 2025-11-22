@@ -1,0 +1,21 @@
+# Compiler files
+cache/
+out/
+deploy/
+
+# Ignores development (and goerli) broadcast logs
+!/broadcast
+/broadcast/*/31337/
+/broadcast/*/5/
+/broadcast/**/dry-run/
+
+# Docs
+docs/
+
+# Dotenv file
+.env
+.env.local
+
+
+# Node modules
+node_modules/
