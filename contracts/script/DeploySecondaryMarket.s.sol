@@ -6,16 +6,16 @@ import {console} from "forge-std/console.sol";
 import {SecondaryMarket} from "../src/SecondaryMarket.sol";
 
 contract DeploySecondaryMarket is Script {
-    // Base Sepolia addresses
-    address constant RISK_TOKEN_BASE_SEPOLIA = 0xAcd7FFd3Bbb6A57E6856655Cb34b17169584486A;
+    // Base Sepolia addresses - UPDATED
+    address constant RISK_TOKEN_BASE_SEPOLIA = 0x3811ee90A5dEf4FDFBd18aC3cf77Cf3de07da216;
     address constant USDC_BASE_SEPOLIA = 0x036CbD53842c5426634e7929541eC2318f3dCF7e;
-    address constant HOOK_BASE_SEPOLIA = 0x1C9f149Ab2eb65d1928f5373b91bD5e8E48BCfC0;
+    address constant HOOK_BASE_SEPOLIA = 0xCca4f3F7dB08C48cB6f315D4c9A54CB9c31C8FC0;
     address constant STATE_VIEW_BASE_SEPOLIA = 0x571291b572ed32ce6751a2Cb2486EbEe8DEfB9B4;
 
-    // Ethereum Sepolia addresses
-    address constant RISK_TOKEN_ETHEREUM_SEPOLIA = 0xEba681bc4C4e5EdA7Dabace33890947Aa99B98F3;
+    // Ethereum Sepolia addresses - UPDATED
+    address constant RISK_TOKEN_ETHEREUM_SEPOLIA = 0xA57bc9919F90dc0442b38F9C7237F1D245d09397;
     address constant USDC_ETHEREUM_SEPOLIA = 0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238;
-    address constant HOOK_ETHEREUM_SEPOLIA = 0x1C9f149Ab2eb65d1928f5373b91bD5e8E48BCfC0;
+    address constant HOOK_ETHEREUM_SEPOLIA = 0xCca4f3F7dB08C48cB6f315D4c9A54CB9c31C8FC0;
     address constant STATE_VIEW_ETHEREUM_SEPOLIA = 0xE1Dd9c3fA50EDB962E442f60DfBc432e24537E4C;
 
     function run() external {
