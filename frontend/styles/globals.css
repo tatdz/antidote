@@ -1,0 +1,114 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  
+  body {
+    @apply bg-gray-50;
+  }
+}
+
+@layer components {
+  .gradient-bg {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+  
+  .glass-effect {
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+  }
+
+  /* Compact layout components */
+  .compact-section {
+    @apply mb-4;
+  }
+
+  .compact-card {
+    @apply p-4 mb-4;
+  }
+
+  .compact-grid {
+    @apply gap-3;
+  }
+
+  .compact-padding {
+    @apply p-4;
+  }
+
+  .compact-text {
+    @apply text-sm leading-tight;
+  }
+
+  .compact-heading {
+    @apply text-lg font-semibold mb-2;
+  }
+
+  .compact-subheading {
+    @apply text-base font-medium mb-1;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Reduced spacing utilities */
+  .space-y-compact > * + * {
+    @apply mt-2;
+  }
+
+  .space-y-tight > * + * {
+    @apply mt-3;
+  }
+
+  .gap-compact {
+    @apply gap-2;
+  }
+
+  .gap-tight {
+    @apply gap-3;
+  }
+}
+
+/* Override default spacing in components */
+.bg-white.rounded-2xl.shadow-xl {
+  @apply p-4 mb-4;
+}
+
+.bg-white.rounded-2xl.shadow-lg {
+  @apply p-3 mb-3;
+}
+
+.space-y-6 > * + * {
+  @apply mt-3;
+}
+
+.space-y-4 > * + * {
+  @apply mt-2;
+}
+
+.space-y-8 > * + * {
+  @apply mt-4;
+}
+
+/* Compact form elements */
+input, select, textarea {
+  @apply py-2 px-3 text-sm;
+}
+
+.btn-compact {
+  @apply py-2 px-3 text-sm;
+}
+
+.btn-normal {
+  @apply py-2 px-4 text-sm;
+}
