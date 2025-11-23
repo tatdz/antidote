@@ -54,10 +54,10 @@ Antidote is the first fully permissioned margin call protection protocol built d
 - Cross-chain protection layers across multiple L2s
 
 ## 🎯 Use Cases
-- **Institutional lending protocols
-- **DeFi hedge funds
-- **Market makers & liquidity providers
-- **Treasury management
+- Institutional lending protocols
+- DeFi hedge funds
+- Market makers & liquidity providers
+- Treasury management
 
 ## 🏗️ Architecture
 
