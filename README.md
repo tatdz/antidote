@@ -61,7 +61,8 @@ Antidote is the first fully permissioned margin call protection protocol built d
 
 ## 🏗️ Architecture
 
-![alt text](Compact_Horizontal_antidote.svg)
+<img src="Compact_Horizontal_antidote.svg" alt="Scheme" />
+
 
 ## 🛠️ Tech Stack
 
